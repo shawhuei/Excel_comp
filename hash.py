@@ -14,6 +14,7 @@
 import sys
 import hashlib
 import os
+import string
 
 class File_hash(object):
 	# we check xls and xlsx only

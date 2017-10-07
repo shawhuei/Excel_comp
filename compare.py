@@ -1,3 +1,16 @@
+##!/usr/bin/env python
+# encoding: utf-8
+#
+# Created by shaohui on 2017/9/24
+# Copyright © 2017 shaohui All rights reserved.
+#
+# *********************************************
+
+# *********************************************
+# This file provide function to get file MD5 value.
+#
+# *********************************************
+
 from hash import File_hash
 import sys
 def file_md5_cp():
@@ -21,5 +34,8 @@ def file_md5_cp():
 
 
 if __name__ == "__main__":
-	file_md5_cp()
+	if len(sys.argv) <=1 :
+		print("must input files!")
+	else:
+		file_md5_cp()
 	pass
