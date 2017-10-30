@@ -22,6 +22,13 @@ def print_def(args):
 
 file_path = "test/"
 
+class XLSX_sheet(object):
+	sheet_index = '' #sheet index
+	sheet_name = '' #sheet name
+	sheet_hash = '' #sheet content HASH
+	pass
+	
+
 class XLSX_class(object):
 	file_name = ''	#file name 
 	file_path = ''	#abs file path
@@ -60,12 +67,14 @@ def open_xls(object):
     table = data.sheet_by_index(0)
     df=pandas.read_excel(object,data.sheet_names()[0])
  #   open(table)
-    print(df)
+    #print(df)
     nrows = table.nrows
     ncols = table.ncols
     print(data.sheet_names())
     print(nrows)
     print(ncols)
+    print_def(table)
+    print_def(table.col_values(2))
     #print('file ' + object + ' have ' + 'sheets')
     #print('At sheet one has' + nrows + 'rows And' + ncols + 'cols')
 
