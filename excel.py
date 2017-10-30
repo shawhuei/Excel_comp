@@ -7,7 +7,7 @@
 # *********************************************
 
 # *********************************************
-# This file provide function to get file MD5 value.
+# This file provide function to compare excel and generate result.
 #
 # *********************************************
 import xlsxwriter,xlrd
@@ -16,9 +16,24 @@ from hash import File_hash
 import hashlib
 
 debug = True  # False
+Info = True #False
+Err = True
 
-def print_def(args):
+FILE_ERR = -1
+FILE_SAME = 0
+FILE_DIFF = 1
+
+
+def print_debug(args):
 	if debug:
+		print(args)
+
+def print_info(args):
+	if Info:
+		print(args)
+
+def print_err(args):
+	if Err:
 		print(args)
 
 file_path = "test/"
@@ -35,57 +50,123 @@ class XLSX_sheet(object):
 	
 
 class XLSX_class(object):
-	file_name = ''	#file name 
-	file_path = ''	#abs file path
-	file_hash = ''  #file hash
-	file_snum = ''  #file sheet numbers
-	file_sheet = [] #file sheet info
-	def __init__(self, arg):
-	    self.file_name = arg
-	    print_def(self.file_name)
-	    self.file_path = os.path.abspath(arg)
-	    print_def(self.file_path)
-	    self.file_hash = File_hash(arg).get_hash()
-	    print_def(self.file_hash)
-	    pass
+	file_name = []	#file name 
+	file_path_full = []	#abs file path
+	file_path = [] #file path
+	file_hash = []  #file hash
+	file_snum = []  #file sheet numbers
+	file_sheet = [[] for i in range(2)] #file sheet info
+	
+	file_output = '' #out put file name
+	
+	#private data
+	__data = ''
+	__data2 = ''
+	__table = ''
+	__table2 =''
 
-	def fill_sheets(self):
-			if not os.path.isfile(self.file_name):
-				print("file not exist!\n")
-			data = xlrd.open_workbook(self.file_name)
-			self.file_snum = data.nsheets
-			print_def('sheet nums:%d' %(self.file_snum))
-		
-			for sheet_index in range(self.file_snum):
-				table = data.sheet_by_index(sheet_index)
-				sheet = XLSX_sheet()
-				self.file_sheet.append(sheet)
-				self.file_sheet[sheet_index].sheet_index = sheet_index
-				self.file_sheet[sheet_index].sheet_name = data.sheet_names()[sheet_index]
-				#m = hashlib.md5()
-				#df = pandas.read_excel(self.file_name,data.sheet_names()[sheet_index])
-				#print_def(df)
-				#m.update(df)
-				#self.file_sheet[sheet_index].sheet_hash = m.hexdigest()
-				self.file_sheet[sheet_index].sheet_max_col = table.ncols
-				self.file_sheet[sheet_index].sheet_max_row = table.nrows
-
+	def __init__(self, arg, arg2):
+			self.file_name.append(arg)
+			self.file_name.append(arg2)
+			print_debug('Input File name:%s' %self.file_name)
+			self.file_path_full.append(os.path.abspath(arg))
+			self.file_path_full.append(os.path.abspath(arg2))
+			self.file_path.append(os.path.dirname(self.file_path_full[0]))
+			self.file_path.append(os.path.dirname(self.file_path_full[1]))
+			print_debug('Input File Path:%s' %self.file_path_full)
+			print_debug('Input File Path:%s' %self.file_path)
+			self.file_hash.append(File_hash(arg).get_hash())
+			self.file_hash.append(File_hash(self.file_path_full[1]).get_hash())
+			#print_debug(self.file_hash)
 			pass
 
+#private funs
+
+	def __fill_sheets_A(self):
+		#Fill in Sheet A
+			if not os.path.isfile(self.file_name[0]):
+				print_err("file A %s not exist!\n" %self.file_name[0])
+				return FILE_ERR
+			__data = xlrd.open_workbook(self.file_name[0])
+			self.file_snum.append(__data.nsheets)
+			print_debug('sheet nums:%d' %(self.file_snum[0]))
+		
+			for sheet_index in range(self.file_snum[0]):
+				__table = __data.sheet_by_index(sheet_index)
+				sheet = XLSX_sheet()
+				self.file_sheet[0].append(sheet)
+				self.file_sheet[0][sheet_index].sheet_index = sheet_index
+				self.file_sheet[0][sheet_index].sheet_name = __data.sheet_names()[sheet_index]
+				#m = hashlib.md5()
+				#df = pandas.read_excel(self.file_name,__data.sheet_names()[sheet_index])
+				#print_debug(df)
+				#m.update(df)
+				#self.file_sheet[sheet_index].sheet_hash = m.hexdigest()
+				self.file_sheet[0][sheet_index].sheet_max_col = __table.ncols
+				self.file_sheet[0][sheet_index].sheet_max_row = __table.nrows
+				return 0
+
+			pass
+	def __fill_sheets_B(self):
+		#Fill in Sheet B
+			if not os.path.isfile(self.file_name[1]):
+				print_err("file B %s not exist!\n" %self.file_name[1])
+				return FILE_ERR
+			__data2 = xlrd.open_workbook(self.file_name[1])
+			self.file_snum.append(__data2.nsheets)
+			print_debug('sheet nums:%d' %(self.file_snum[1]))
+		
+			for sheet_index in range(self.file_snum[1]):
+				__table2 = __data2.sheet_by_index(sheet_index)
+				sheet2 = XLSX_sheet()
+				self.file_sheet[1].append(sheet2)
+				self.file_sheet[1][sheet_index].sheet_index = sheet_index
+				self.file_sheet[1][sheet_index].sheet_name = __data2.sheet_names()[sheet_index]
+				#m = hashlib.md5()
+				#df = pandas.read_excel(self.file_name,__data.sheet_names()[sheet_index])
+				#print_debug(df)
+				#m.update(df)
+				#self.file_sheet[sheet_index].sheet_hash = m.hexdigest()
+				self.file_sheet[1][sheet_index].sheet_max_col = __table2.ncols
+				self.file_sheet[1][sheet_index].sheet_max_row = __table2.nrows
+				return 0
+
+			pass
+#Open funcs
+	def __do_compare(self):
+		print_debug('compare start!\n');
+		if(self.file_hash[0] == self.file_hash[1]):
+			print_info('Same file!\n')
+			return FILE_SAME
+		print_info('Diff file!\n')		
+		return FILE_DIFF
+		pass
+			
+	def fill_sheets(self):
+		#Open funcs to user
+			if(self.__fill_sheets_A() == 0 and self.__fill_sheets_B() == 0):
+				return self.__do_compare()
+			else:
+				print_err('Fill in file Err!\n')
+				return FILE_ERR
+			pass
 
 	def show_sheets(self):
-			print_def('show list:')
-			for s in range(self.file_snum):
-				print_def('For index:%d' %(s))
-				print_def(self.file_sheet[s].sheet_index)
-				print_def(self.file_sheet[s].sheet_name)
-				#print_def(self.file_sheet[s].sheet_hash)
-				print_def(self.file_sheet[s].sheet_max_col)				
-				print_def(self.file_sheet[s].sheet_max_row)		
+			for i in range (0,2,1):
+				print_info('show list:%d' %i)
+				for s in range(self.file_snum[i]):
+					print_info('For index:%d' %(s))
+					print_info(self.file_sheet[i][s].sheet_index)
+					print_info(self.file_sheet[i][s].sheet_name)
+					#print_debug(self.file_sheet[0][s].sheet_hash)
+					print_info(self.file_sheet[i][s].sheet_max_col)				
+					print_info(self.file_sheet[i][s].sheet_max_row)		
 					
 			pass
 
 
+
+#Test codes:
 
 def creat_xls(object):
 	w_b = xlsxwriter.Workbook(file_path+object)
@@ -95,30 +176,42 @@ def creat_xls(object):
 
 def open_xls(object):
     if not os.path.isfile(object):
-        print("file not exist!\n")
+        print_err("file not exist!\n")
     data = xlrd.open_workbook(object)
     data.sheet_names()
     table = data.sheet_by_index(0)
     df=pandas.read_excel(object,data.sheet_names()[0])
  #   open(table)
-    #print(df)
+    #print_debug(df)
     nrows = table.nrows
     ncols = table.ncols
-    print(data.sheet_names())
-    print(nrows)
-    print(ncols)
-    print_def(table)
-    print_def(table.col_values(2))
-    #print('file ' + object + ' have ' + 'sheets')
-    #print('At sheet one has' + nrows + 'rows And' + ncols + 'cols')
+    print_debug(data.sheet_names())
+    print_debug(nrows)
+    print_debug(ncols)
+    print_debug(table)
+    print_debug(table.col_values(2))
+    #print_debug('file ' + object + ' have ' + 'sheets')
+    #print_debug('At sheet one has' + nrows + 'rows And' + ncols + 'cols')
 
 
 
 
-# if __name__ == "__main__":
-#creat_xls('hello.xlsx')
+
 pass
-#open_xls(file_path+'hello.xlsx')
-test= XLSX_class(file_path+'hello.xlsx')
-test.fill_sheets()
-test.show_sheets()
+
+
+
+
+
+
+
+# Examples:
+
+if __name__ == "__main__":
+	#creat_xls('hello.xlsx')
+	#open_xls(file_path+'hello.xlsx')
+	test= XLSX_class(file_path+'hello.xlsx',file_path+'hello2.xlsx')
+	
+	ret = test.fill_sheets()
+	print_debug(ret)
+	#test.show_sheets()
