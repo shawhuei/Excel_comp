@@ -13,6 +13,7 @@
 import xlsxwriter,xlrd
 import os,pandas
 from hash import File_hash
+import hashlib
 
 debug = True  # False
 
@@ -25,7 +26,11 @@ file_path = "test/"
 class XLSX_sheet(object):
 	sheet_index = '' #sheet index
 	sheet_name = '' #sheet name
-	sheet_hash = '' #sheet content HASH
+#	sheet_hash = '' #sheet content HASH
+	sheet_max_col = 0  #Max col nums
+	sheet_max_row = 0  #Max row nums
+	sheet_row_ret = [] # only used in output file
+	sheet_col_ret = [] # only used in output file
 	pass
 	
 
@@ -34,6 +39,7 @@ class XLSX_class(object):
 	file_path = ''	#abs file path
 	file_hash = ''  #file hash
 	file_snum = ''  #file sheet numbers
+	file_sheet = [] #file sheet info
 	def __init__(self, arg):
 	    self.file_name = arg
 	    print_def(self.file_name)
@@ -41,15 +47,43 @@ class XLSX_class(object):
 	    print_def(self.file_path)
 	    self.file_hash = File_hash(arg).get_hash()
 	    print_def(self.file_hash)
-	    self.file_snum = len(xlrd.open_workbook(arg).sheet_names())
-	    print_def(self.file_snum)
 	    pass
 
-	def fill_sheets(self,arg):
-		pass
+	def fill_sheets(self):
+			if not os.path.isfile(self.file_name):
+				print("file not exist!\n")
+			data = xlrd.open_workbook(self.file_name)
+			self.file_snum = data.nsheets
+			print_def('sheet nums:%d' %(self.file_snum))
+		
+			for sheet_index in range(self.file_snum):
+				table = data.sheet_by_index(sheet_index)
+				sheet = XLSX_sheet()
+				self.file_sheet.append(sheet)
+				self.file_sheet[sheet_index].sheet_index = sheet_index
+				self.file_sheet[sheet_index].sheet_name = data.sheet_names()[sheet_index]
+				#m = hashlib.md5()
+				#df = pandas.read_excel(self.file_name,data.sheet_names()[sheet_index])
+				#print_def(df)
+				#m.update(df)
+				#self.file_sheet[sheet_index].sheet_hash = m.hexdigest()
+				self.file_sheet[sheet_index].sheet_max_col = table.ncols
+				self.file_sheet[sheet_index].sheet_max_row = table.nrows
+
+			pass
 
 
-
+	def show_sheets(self):
+			print_def('show list:')
+			for s in range(self.file_snum):
+				print_def('For index:%d' %(s))
+				print_def(self.file_sheet[s].sheet_index)
+				print_def(self.file_sheet[s].sheet_name)
+				#print_def(self.file_sheet[s].sheet_hash)
+				print_def(self.file_sheet[s].sheet_max_col)				
+				print_def(self.file_sheet[s].sheet_max_row)		
+					
+			pass
 
 
 
@@ -84,5 +118,7 @@ def open_xls(object):
 # if __name__ == "__main__":
 #creat_xls('hello.xlsx')
 pass
-open_xls(file_path+'hello.xlsx')
+#open_xls(file_path+'hello.xlsx')
 test= XLSX_class(file_path+'hello.xlsx')
+test.fill_sheets()
+test.show_sheets()
