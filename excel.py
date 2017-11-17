@@ -217,7 +217,7 @@ class XLSX_class(object):
 			print_debug('Cur sheet %d, row %d,Max col %d' %(s,max_row,max_col))
 			for r in range(max_row):	#compare by row
 				if(self.__table[s].row_values(r) == self.__table2[s].row_values(r)):
-					#print_debug('Row %d' %r)
+					print_debug('Same Row %d' %r)
 					self.file_sheet[2][s].sheet_row_ret.append(SAME_ROW)
 					#self.file_sheet[2][s].sheet_ret[r].append(SAME_ROW)
 					#self.file_sheet[2][s].sheet_row_ret.append(SAME_ROW)
@@ -225,13 +225,16 @@ class XLSX_class(object):
 					for c in range(max_col):
 						if(self.__table[s].cell(r,c).value == self.__table2[s].cell(r,c).value):
 							self.file_sheet[2][s].sheet_col_ret.append(SAME_CELL)
+							#print_debug('Same cell %d %d' %(r,c))
 							#self.file_sheet[2][s].sheet_ret[r].append(SAME_CELL)
 						else:
 							self.file_sheet[2][s].sheet_col_ret.append(DIFF_CELL)
+							print_debug('Diff cell %d %d' %(r,c))
 							#self.file_sheet[2][s].sheet_ret[r].append(DIFF_CELL)		
 				
 					self.file_sheet[2][s].sheet_row_ret.append(self.file_sheet[2][s].sheet_col_ret)
-
+					self.file_sheet[2][s].sheet_col_ret=[]     #Clear list					
+				print_debug(self.file_sheet[2][s].sheet_row_ret)
 		print_info('Accurate Compare By Row end!\n')				
 							
 		pass
@@ -251,8 +254,8 @@ class XLSX_class(object):
 						#print_debug('color cell: %d %d' %(r,c))
 						#print_debug(self.file_sheet[2][s].sheet_row_ret[r])
 						if(self.file_sheet[2][s].sheet_row_ret[r][c] != SAME_CELL):
-							print_debug('color cell: %d %d' %(r,c))
 							winSheet.Cells(r+1,c+1).Interior.ColorIndex = 3
+							print_debug('color cell: %d %d' %(r,c))
 		############################################################################################
 		
 		winBook.Save()
