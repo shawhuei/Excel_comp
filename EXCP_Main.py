@@ -6,7 +6,7 @@ from excel import XLSX_class
 
 VERSION_NO = "V0.1"
 
-LOGO = "Res/Logo.jpg"
+LOGO_DIR = "Res"
 
 class MainFrame(wx.Frame):
 	ContentsA = ''
@@ -50,12 +50,16 @@ class MainFrame(wx.Frame):
 		self.button.SetDefault()
 
 		#show logo
-		image = wx.Image(LOGO,wx.BITMAP_TYPE_JPEG)
+		image = wx.Image(self.res_path(os.path.join(LOGO_DIR,'LOGO.jpg')),wx.BITMAP_TYPE_JPEG)
 		temp = image.ConvertToBitmap()
 		size = temp.GetWidth(),temp.GetHeight()
 		wx.StaticBitmap(parent=panel,bitmap=temp,pos=(500,50))
 
 		self.Show(True)
+	def res_path(self,relative):
+		if hasattr(sys, "_MEIPASS"):
+			return os.path.join(sys._MEIPASS, relative)
+		return os.path.join(relative)
 		
 	def OnAbout(self,event):
 		print("About event!")
