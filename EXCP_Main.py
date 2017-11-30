@@ -2,11 +2,19 @@
 
 import wx
 
+from excel import XLSX_class
+
+VERSION_NO = "V0.1"
+
+LOGO = "Res/Logo.jpg"
+
 class MainFrame(wx.Frame):
 	ContentsA = ''
 	ContentsB = ''
 	def __init__(self,parent,title):
-		wx.Frame.__init__(self,parent,title=title,size=(1000,600))
+		self.ContentsA = ''
+		self.ContentsB = ''
+		wx.Frame.__init__(self,parent,title=title,size=(800,400))
 		#self.control=wx.TextCtrl(self,style=wx.TE_MULTILINE)
 		
 		self.CreateStatusBar()
@@ -16,8 +24,8 @@ class MainFrame(wx.Frame):
 		menuItem = filemenu.Append(wx.ID_ABOUT,"&About","Designed By Sam")
 		self.Bind(wx.EVT_MENU,self.OnAbout,menuItem)
 		filemenu.AppendSeparator()
-		filemenu.Append(wx.ID_EXIT,"&Exit","Exit")
-		
+		menuItem=filemenu.Append(wx.ID_EXIT,"&Exit","Exit")
+		self.Bind(wx.EVT_MENU,self.OnExit,menuItem)
 		menuBar=wx.MenuBar()
 		menuBar.Append(filemenu,"&File")
 	
@@ -41,15 +49,27 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON,self.OnCompareClick,self.button)
 		self.button.SetDefault()
 
+		#show logo
+		image = wx.Image(LOGO,wx.BITMAP_TYPE_JPEG)
+		temp = image.ConvertToBitmap()
+		size = temp.GetWidth(),temp.GetHeight()
+		wx.StaticBitmap(parent=panel,bitmap=temp,pos=(500,50))
+
 		self.Show(True)
 		
 	def OnAbout(self,event):
 		print("About event!")
 		#Pop a message
-		dlg=wx.MessageDialog(None,"Designed by Sam!\n(shawhuei@126.com)","About",wx.YES_DEFAULT)
+		dlg=wx.MessageDialog(None,"Designed by Sam!\n(shawhuei@126.com)\nVersion: "+VERSION_NO,"About",wx.YES_DEFAULT)
 		result=dlg.ShowModal()
 		dlg.Destroy()
 		
+	def OnExit(self,event):
+		print("Exit event!")
+		#Pop a message
+		wx.Exit()
+		pass
+				
 	def OnOpenAClick(self,event):
 		print("Click A!")
 		dlg = wx.FileDialog(self,message="Choose a file",defaultFile="",wildcard="Excel files (*.xlsx)|*.xlsx")#,style=wx.CHANGE_DIR)#wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR)
@@ -74,11 +94,30 @@ class MainFrame(wx.Frame):
 
 	def OnCompareClick(self,event):
 		print("start compare!")
+		Diag=""
 		fileA = self.ContentsA.GetValue()
 		fileB = self.ContentsB.GetValue()
 		print(fileA + fileB)
+		compare=XLSX_class(fileA,fileB)
+		ret=compare.fill_sheets()
+		print("compare ret:%d" %ret)
+		if(ret==1):
+			Diag="Compare completed!"
+		if(ret==0):
+			Diag="Same files!"
+		if(ret==-1):
+			Diag="Compare Failed!"
+		dlg=wx.MessageDialog(None,Diag,"Result!",wx.YES_DEFAULT)
+		result=dlg.ShowModal()
+		dlg.Destroy()
 		
+	
 
-app = wx.App(False)
-frame=MainFrame(None,'Excel Compare')
-app.MainLoop()
+
+
+
+		
+if __name__ == "__main__":
+	app = wx.App(False)
+	frame=MainFrame(None,'Excel Compare '+VERSION_NO)
+	app.MainLoop()

@@ -19,9 +19,7 @@ from xlutils.copy import copy
 
 import win32com.client
 
-debug = True  # False
-Info = True #False
-Err = True
+
 
 FILE_ERR = -1
 FILE_SAME = 0
@@ -35,6 +33,11 @@ SAME_CELL	=	'SCELL'
 
 EXTEND_FILE = '_ret'
 
+#debug log level
+debug = False  # False
+Info = True #False
+Err = True
+
 def print_debug(args):
 	if debug:
 		print(args)
@@ -47,7 +50,7 @@ def print_err(args):
 	if Err:
 		print(args)
 
-file_path = "test/"
+file_path = "test/"	#for test
 
 class XLSX_sheet(object):
 	sheet_index = '' #sheet index
@@ -79,6 +82,19 @@ class XLSX_class(object):
 	__table3 = []
 
 	def __init__(self, arg, arg2):
+		self.file_name = []	#file name 
+		self.file_path_full = []	#abs file path
+		self.file_path = [] #file path
+		self.file_hash = []  #file hash
+		self.file_snum = []  #file sheet numbers
+		self.file_sheet = [[] for i in range(3)] #file sheet info
+		self.file_output = '' #out put file name
+		self.__data = ''
+		self.__data2 = ''
+		self.__data3 = ''
+		self.__table = []
+		self.__table2 =[]
+		self.__table3 = []
 		self.file_name.append(os.path.basename(arg))
 		self.file_name.append(os.path.basename(arg2))
 		print_debug('Input File name:%s' %self.file_name)
@@ -326,8 +342,10 @@ class XLSX_class(object):
 if __name__ == "__main__":
 	#creat_xls('hello.xlsx')
 	#open_xls(file_path+'hello.xlsx')
-	test= XLSX_class(file_path+'hello.xlsx',file_path+'hello2.xlsx')
 	
+	
+	#Followed test code
+	test= XLSX_class(file_path+'hello.xlsx',file_path+'hello2.xlsx')
 	ret = test.fill_sheets()
 	print_debug('Debug test,ret:%d' %ret)
 	#test.show_sheets()
