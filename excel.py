@@ -10,6 +10,7 @@
 # This file provide function to compare excel and generate result.
 #
 # *********************************************
+from print_def import *
 import xlsxwriter,xlrd
 import os,pandas
 from hash import File_hash
@@ -33,22 +34,7 @@ SAME_CELL	=	'SCELL'
 
 EXTEND_FILE = '_ret'
 
-#debug log level
-debug = False  # False
-Info = True #False
-Err = True
 
-def print_debug(args):
-	if debug:
-		print(args)
-
-def print_info(args):
-	if Info:
-		print(args)
-
-def print_err(args):
-	if Err:
-		print(args)
 
 file_path = "test/"	#for test
 

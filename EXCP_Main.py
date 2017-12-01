@@ -1,6 +1,9 @@
 #!/usr/bin/env python 
-
+from print_def import *
 import wx
+import os
+import sys
+from optparse import OptionParser
 
 from excel import XLSX_class
 
@@ -62,20 +65,20 @@ class MainFrame(wx.Frame):
 		return os.path.join(relative)
 		
 	def OnAbout(self,event):
-		print("About event!")
+		print_info("About event!")
 		#Pop a message
 		dlg=wx.MessageDialog(None,"Designed by Sam!\n(shawhuei@126.com)\nVersion: "+VERSION_NO,"About",wx.YES_DEFAULT)
 		result=dlg.ShowModal()
 		dlg.Destroy()
 		
 	def OnExit(self,event):
-		print("Exit event!")
+		print_info("Exit event!")
 		#Pop a message
 		wx.Exit()
 		pass
 				
 	def OnOpenAClick(self,event):
-		print("Click A!")
+		print_info("Click A!")
 		dlg = wx.FileDialog(self,message="Choose a file",defaultFile="",wildcard="Excel files (*.xlsx)|*.xlsx")#,style=wx.CHANGE_DIR)#wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR)
 		if dlg.ShowModal() == wx.ID_OK:
 			tmp=''
@@ -86,7 +89,7 @@ class MainFrame(wx.Frame):
 		dlg.Destroy()
 
 	def OnOpenBClick(self,event):
-		print("Click B!")
+		print_info("Click B!")
 		dlg = wx.FileDialog(self,message="Choose a file",defaultFile="",wildcard="Excel files (*.xlsx)|*.xlsx")#,style=wx.CHANGE_DIR)#wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR)
 		if dlg.ShowModal() == wx.ID_OK:
 			tmp=''
@@ -97,14 +100,14 @@ class MainFrame(wx.Frame):
 		dlg.Destroy()			
 
 	def OnCompareClick(self,event):
-		print("start compare!")
+		print_info("start compare!")
 		Diag=""
 		fileA = self.ContentsA.GetValue()
 		fileB = self.ContentsB.GetValue()
-		print(fileA + fileB)
+		print_debug(fileA + fileB)
 		compare=XLSX_class(fileA,fileB)
 		ret=compare.fill_sheets()
-		print("compare ret:%d" %ret)
+		print_info("compare end.ret:%d" %ret)
 		if(ret==1):
 			Diag="Compare completed!"
 		if(ret==0):
@@ -122,6 +125,23 @@ class MainFrame(wx.Frame):
 
 		
 if __name__ == "__main__":
+	if len(sys.argv) >1 :
+		opt = OptionParser()
+		opt.add_option('-D',
+										dest = "Debug_level",
+										default = 1,
+										type = int,
+										help="DEBUG_LEVEL:0,1,2. 0 for error only,1 for info and error,2 for debug,info and debug.")
+										
+		(options,args) = opt.parse_args()
+		is_valid_paras = True
+		D_level = options.Debug_level
+		if(print_level_set(D_level)<0):
+			print_err("debug level set Fail:%d"  %D_level)
+			sys.exit()
+		else:
+			print_info("debug level set:%d" %D_level)
+
 	app = wx.App(False)
 	frame=MainFrame(None,'Excel Compare '+VERSION_NO)
 	app.MainLoop()
